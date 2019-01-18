@@ -126,20 +126,16 @@ task :phoenix_digest do
 
   UI.info("Building Assets...")
 
-  # commands = [
-  #  case File.exists?("package.json") do
-  #    true ->
-
-  #    false ->
-
-  #  end
-  # ]
   commands = [
-    ["[ -f package.json ] && yarn install || true", []],
-    ["[ -f package.json ] && yarn build || true", []],
-    ["[ -f assets/package.json ] && cd assets && yarn install || true", []],
-    ["[ -f assets/package.json ] && cd assets && yarn build || true", []],
-    ["[ -d deps/phoenix ] && MIX_ENV=#{mix_env} mix phx.digest || true", []]
+   case File.exists?("package.json") do
+     true ->
+      ["yarn", ["install"]],
+      ["yarn", ["build"]]
+     false ->
+      ["cd", ["assets", "&&", "yarn", "install"]],
+      ["cd", ["assets", "&&", "yarn", "build"]]
+   end
+   ["MIX_ENV=#{mix_env}", ["mix", "phx.digest"]]
   ]
 
   docker_args =

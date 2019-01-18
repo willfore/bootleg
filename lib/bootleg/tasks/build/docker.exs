@@ -136,9 +136,13 @@ task :phoenix_digest do
         ]
 
       false ->
+        source_path
+        |> Path.join("assets")
+        |> File.cd!()
+
         [
-          ["cd", ["assets", "&&", "yarn", "install"]],
-          ["cd", ["assets", "&&", "yarn", "build"]],
+          ["yarn", ["install"]],
+          ["yarn", ["build"]],
           ["MIX_ENV=#{mix_env}", ["mix", "phx.digest"]]
         ]
     end

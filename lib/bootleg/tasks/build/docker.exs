@@ -127,8 +127,8 @@ task :phoenix_digest do
   UI.info("Building Assets...")
 
   commands = [
-    ["yarn", ["install", "--cwd", "/opt/build/assets"]],
-    ["yarn", ["build", "/opt/build/assets"]],
+    ["yarn", ["install", "--cwd", "/opt/build/grid/assets"]],
+    ["yarn", ["build", "/opt/build/grid/assets"]],
     ["mix", ["phx.digest"]]
   ]
 

@@ -9,6 +9,7 @@ end
 
 task :docker_build do
   invoke(:docker_compile)
+  invoke(:phoenix_digest)
   invoke(:docker_generate_release)
   invoke(:docker_copy_release)
 end
@@ -114,4 +115,58 @@ task :docker_copy_release do
   File.cp!(archive_path, Path.join(local_archive_folder, "#{app_version}.tar.gz"))
 
   UI.info("Saved: releases/#{app_version}.tar.gz")
+end
+
+task :phoenix_digest do
+  mix_env = config({:mix_env, "prod"})
+  source_path = config({:ex_path, File.cwd!()})
+  docker_image = config(:docker_build_image)
+  docker_mount = config({:docker_build_mount, "#{source_path}:/opt/build"})
+  docker_run_options = config({:docker_build_opts, []})
+
+  UI.info("Building Assets...")
+
+  # commands = [
+  #  case File.exists?("package.json") do
+  #    true ->
+
+  #    false ->
+
+  #  end
+  # ]
+  commands = [
+    ["[ -f package.json ] && yarn install || true", []],
+    ["[ -f package.json ] && yarn build || true", []],
+    ["[ -f assets/package.json ] && cd assets && yarn install || true", []],
+    ["[ -f assets/package.json ] && cd assets && yarn build || true", []],
+    ["[ -d deps/phoenix ] && MIX_ENV=#{mix_env} mix phx.digest || true", []]
+  ]
+
+  docker_args =
+    [
+      "run",
+      "-v",
+      docker_mount,
+      "--rm",
+      "-t",
+      "-e",
+      "MIX_ENV=#{mix_env}"
+    ] ++ docker_run_options ++ [docker_image]
+
+  UI.debug("Docker command prefix:\n  " <> Enum.join(docker_args, " "))
+
+  Enum.each(commands, fn [c, args] ->
+    UI.info("[docker] #{c} " <> Enum.join(args, " "))
+
+    {_stream, status} =
+      System.cmd(
+        "docker",
+        docker_args ++ [c | args],
+        into: IO.stream(:stdio, :line)
+      )
+
+    if status != 0, do: raise("Command returned non-zero exit status #{status}")
+  end)
+
+  UI.info("Phoenix asset digest generated")
 end

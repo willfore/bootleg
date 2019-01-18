@@ -125,27 +125,14 @@ task :phoenix_digest do
   docker_run_options = config({:docker_build_opts, []})
 
   UI.info("Building Assets...")
+  File.cd!("#{source_path}/assets")
+  UI.info("we are now in #{File.cwd!()})")
 
-  commands =
-    case File.exists?("package.json") do
-      true ->
-        [
-          ["yarn", ["install"]],
-          ["yarn", ["build"]],
-          ["MIX_ENV=#{mix_env}", ["mix", "phx.digest"]]
-        ]
-
-      false ->
-        source_path
-        |> Path.join("assets")
-        |> File.cd!()
-
-        [
-          ["yarn", ["install"]],
-          ["yarn", ["build"]],
-          ["MIX_ENV=#{mix_env}", ["mix", "phx.digest"]]
-        ]
-    end
+  commands = [
+    ["yarn", ["install"]],
+    ["yarn", ["build"]],
+    ["MIX_ENV=#{mix_env}", ["mix", "phx.digest"]]
+  ]
 
   docker_args =
     [

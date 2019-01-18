@@ -128,7 +128,7 @@ task :phoenix_digest do
 
   commands = [
     ["yarn", ["install", "--cwd", "/opt/build/grid/assets"]],
-    ["yarn", ["build", "/opt/build/grid/assets"]],
+    ["yarn", ["build", "--cwd", "/opt/build/grid/assets"]],
     ["mix", ["phx.digest"]]
   ]
 

@@ -125,13 +125,11 @@ task :phoenix_digest do
   docker_run_options = config({:docker_build_opts, []})
 
   UI.info("Building Assets...")
-  File.cd!("#{source_path}/assets")
-  UI.info("we are now in #{File.cwd!()})")
 
   commands = [
-    ["yarn", ["install"]],
-    ["yarn", ["build"]],
-    ["MIX_ENV=#{mix_env}", ["mix", "phx.digest"]]
+    ["yarn", ["install", "--cwd", "#{docker_mount}/assets"]],
+    ["yarn", ["build", "#{docker_mount}/assets"]],
+    ["mix", ["phx.digest"]]
   ]
 
   docker_args =

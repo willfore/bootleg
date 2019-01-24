@@ -123,12 +123,12 @@ task :phoenix_digest do
   docker_image = config(:docker_build_image)
   docker_mount = config({:docker_build_mount, "#{source_path}:/opt/build"})
   docker_run_options = config({:docker_build_opts, []})
-
+  asset_dir = "/opt/build/#{Mix.Project.get().project[:app] |> Atom.to_string()}"
   UI.info("Building Assets...")
 
   commands = [
-    ["yarn", ["--cwd", "/opt/build/grid/assets", "install"]],
-    ["yarn", ["--cwd", "/opt/build/grid/assets", "build"]],
+    ["yarn", ["--cwd", asset_dir, "install"]],
+    ["yarn", ["--cwd", asset_dir, "build"]],
     ["mix", ["phx.digest"]]
   ]
 
